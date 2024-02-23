@@ -1,23 +1,21 @@
 # StabilityCCA
 
-This repository contains MATLAB implementations of two methods: **SCCA-EC**, a sparse canonical correlation analysis method, and **StabilityCCA** which performs stability selection for CCA
-using SCCA-EC.
+This repository contains MATLAB implementations of two sparse CCA methods, **SCCA-EC** and **PMD-CCA**, and a method for performing stability selection using sparse CCA, **StabilityCCA**.
 
-The folder `MicrobiomeDataset` contains the results presented in the paper describing StabilityCCA, obtained by applying the methods to the data set published in [5], as well as the scripts used to produce them.
-
-SCCA-EC is based off [1] and [2], and uses a combination of L_1 and L_2 -norm constraints to induce sparsity, and an alternating
-projected gradient method to find optima. The particular feature of SCCA-EC is that by default it calculates regularisation paths: if no sparsity
-parameters are given, the function returns a sequence of CCA models, each for a pair of sparsity parameter values. StabilityCCA uses this feature to
+PMD-CCA is the penalised matrix decomposition approach presented in [1].
+SCCA-EC combines the L_1 and L_2 -norm constraints from [1] with the alternating projected gradient algorithm from [2].
+Both methods can be used to calculate regularisation paths: if no sparsity
+parameters are given, the functions return a sequence of CCA models, each for a pair of sparsity parameter values. StabilityCCA uses this feature to
 calculate stability paths (see [3] and [4]): data is subsampled in order to estimate the probability that each variable would be selected by SCCA at a given
 level of sparsity.
 
-The main functions for using SCCA-EC and StabilityCCA are `SCCAec` and `stabilityCCA`, respectively.
+The main functions are `SCCA-EC/SCCAec`, `PMD-CCA/PMDCCA` and `stabilityCCA`.
 
 "Installing" a MATLAB package is easy: just clone this repository and add
-it to your MATLAB path:
+it and its subfolders to your MATLAB path:
 
 ```
-addpath('path_to/stabilityCCA')
+addpath(genpath('path_to/stabilityCCA'))
 ```
 
 ## SCCA-EC
@@ -55,6 +53,15 @@ Calculate multiple pairs of canonical variables:
 [A,B,r,U,V] = SCCAec(data1.X,data1.Y,'cxy',[cx,cy],'D',2);
 
 scatter(U(:,1,2),V(:,1,2)) % 2nd pair of canonical variables
+```
+
+## PMD-CCA
+
+The `PMDCCA` function works exactly the same way:
+```
+[A,B,~,~,~,cxy] = PMDCCA(data2.X,data2.Y);
+[A,B,r,U,V] = PMDCCA(data1.X,data1.Y,'cxy',[cx,cy]);
+[A,B,r,U,V] = PMDCCA(data1.X,data1.Y,'cxy',[cx,cy],'D',2);
 ```
 
 ## StabilityCCA
@@ -97,5 +104,3 @@ PMLR, 2019.
 
 [4] Shah, Rajen D., and Richard J. Samworth. "Variable selection with error control: another look at stability selection." Journal of the Royal Statistical
 Society: Series B (Statistical Methodology) 75.1 (2013): 55-80.
-
-[5] Franzosa, Eric A., et al. "Gut microbiome structure and metabolic activity in inflammatory bowel disease." Nature microbiology 4.2 (2019): 293-305.
