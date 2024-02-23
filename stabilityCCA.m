@@ -5,7 +5,7 @@ function [A,B] = stabilityCCA(X,Y,varargin)
 %   the variables in the columns of X and Y.
 %   Given a sequence of pairs of regularisation parameters [cx cy], X and Y
 %   are concurrently split in two randomly 50 times, and a regularisation
-%   path is calculated over [cx cy] using the SCCAec function. The
+%   path is calculated over [cx cy] using a sparse CCA function. The
 %   probability of a variable to be selected at given [cx cy] is the
 %   portion of subsets it has a non-zero (or above threshold) coefficient.
 %
@@ -13,6 +13,9 @@ function [A,B] = stabilityCCA(X,Y,varargin)
 %   X           -   n-by-px data matrix
 %   Y           -   n-by-py data matrix
 %   OPTIONAL INPUTS:
+%   'SCCA'      -   which sparse CCA method to use:
+%                       "SCCAec" (default)
+%                       "PMDCCA"
 %   'cxy'       -   l-by-2 matrix of regularisation parameters for X and Y
 %                   views: cxy(:,1) for X, and cxy(:,2) for Y.
 %                   Should be in ascending order (decreasing sparsity)
@@ -56,6 +59,7 @@ verbose = 1;
 eps = 0;
 D = 1;
 cxy = [];
+fun = "SCCAec";
 
 if ~isempty(varargin)
     if rem(size(varargin, 2), 2) ~= 0
@@ -63,6 +67,8 @@ if ~isempty(varargin)
     else
         for i = 1:2:size(varargin, 2)
             switch varargin{1, i}
+                case 'SCCA'
+					fun = varargin{1, i+1};
                 case 'D'
 					D = varargin{1, i+1};
                 case 'cxy'
@@ -78,6 +84,10 @@ if ~isempty(varargin)
             end
         end
     end
+end
+
+if ~ismember(fun,["SCCAec";"PMDCCA"])
+    error('SCCA should be SCCAec or PMDCCA')
 end
 
 rounds = 100;
@@ -102,7 +112,11 @@ parfor i=1:nParts
     verbose && fprintf('\t Subsample %d of %d\n',i,nParts);
     Xtmp = X(parts(:,i),:);
     Ytmp = Y(parts(:,i),:);
-    [Atmp,Btmp] = SCCAec(Xtmp,Ytmp,'cxy',cxy,'D',D);
+    if fun=="SCCAec"
+        [Atmp,Btmp] = SCCAec(Xtmp,Ytmp,'cxy',cxy,'D',D);
+    else
+        [Atmp,Btmp] = PMDCCA(Xtmp,Ytmp,'cxy',cxy,'D',D);
+    end
     Asel = abs(Atmp)>eps*max(abs(Atmp),[],1);
     probsA = probsA + pagetranspose(Asel);
     numSelA(:,i,:) = sum(Asel,1);

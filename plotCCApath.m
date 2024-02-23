@@ -1,8 +1,8 @@
 function plotCCApath(A,c,vars)
 
-% plotCCApath(A,c,vars) Plot the output of `SCCAec` for one view
+% plotCCApath(A,c,vars) Plot the output of a SCCA function for one view
 %   plotCCApath(A,c,vars) plots the regularisation path calculated by
-% `SCCAec` for one view
+% `SCCAec` or `PMDCCA` for one view
 %
 %   INPUTS:
 %   A       -   p-by-l matrix where every column is a canonical coefficient
